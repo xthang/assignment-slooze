@@ -9,15 +9,15 @@ HOW TO START:
 
 1. Install Python 3.
 2. Install Make (you can skip this if you know how to run script directly from Makefile).
-3. Install Docker. Then run 'docker-compose.yml' to install local Posgresql.
-   You can skip this step if you already have another Postgres DB installed.
+3. Install Docker. Then run 'docker-compose.yml' to install local PostgresQL.
+   You can skip this step if you already have another PostgresQL DB installed.
 4. Create a new DB instance. Get its connection URL.
 5. (optional) Create Python Virtual Environment and activate it.
    Read: https://docs.python.org/3/library/venv.html
 6. Install project's dependencies: `pip install -r requirements.txt`.
 7. This project use Prisma as ORM. We need to push Prisma schema to the DB schema: `dotenv -e .env.development prisma db push` OR `make prisma-push`.
 8. Generate Prisma files: `prisma generate` OR `make prisma-generate`.
-9. Generate initial data by running SQL script: '/prisma/data/init.sql' to insert base data: Super user, organization, etc.
+9. Generate initial data by running the following SQL script: '/prisma/data/init.sql' to insert base data: Super user, organization, etc.
 10. Run `python main.py` to start the app
 
 DEMO:
