@@ -38,7 +38,7 @@ DEMO:
    After the user inputs all required data, the page send a request to Backend API to sign the user up:
    `curl --location 'http://127.0.0.1:8000/sign-up-by-invitation' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
---data-urlencode 'token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im5neHRAeWFob28uY29tIiwib3JnLWlkIjoib3JnXzEiLCJyb2xlIjoiYWRtaW4iLCJpbnZpdGVkLWJ5IjoiYWNjXzEifQ.CKURtiSLsOBz7kesSQ8Dtk3udg_Uj3LeBldQbwleKgdsAdhsENDvi0RqNu7MH5dnBRoejD3t4-xlvpfmlJA_eb6KnBW5M7YyunuIDLInS2dgehikryjX-NuEUoInyewVXG0vgFdGj9FGNLOjlbOKJV7tBXCO92vgr5RK7l6PNylVKA-gJ7Df8v-Nu9ZT56mVq3AU5VSa30LaaNShICdXeZ1djTGT1cEDmschdxxDrkjPNHOe047O8Ka4F8B-6QsgVjZMLWBsj_oLjnEEQeY-XYekkrGAJBtVh9X8NcyiwHV_mVCGRVtMXW7p6jWIpOaHmHvePiVftj1Oh0OPFhsogA' \
+--data-urlencode 'token=••••••' \
 --data-urlencode 'username=admin' \
 --data-urlencode 'first_name=Firsttt' \
 --data-urlencode 'last_name=Lasttt' \
