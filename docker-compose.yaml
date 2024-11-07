@@ -1,0 +1,32 @@
+networks:
+  x-network:
+    name: x-network
+
+services:
+  db:
+    image: postgres
+    container_name: x-postgres
+    restart: always
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    # volumes:
+    #   - type: tmpfs
+    #     target: /dev/shm
+    #     tmpfs:
+    #       size: 134217728 # 128*2^20 bytes = 128Mb
+    environment:
+      # POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Passs1234
+      # POSTGRES_DB: auth
+    volumes:
+      - ./db-data/postgres/:/var/lib/postgresql/data/
+    # deploy:
+    #   mode: replicated
+    #   replicas: 1
+    network_mode: host
+    # networks:
+    #   - x-network
+    ports:
+      - 5432:5432
+

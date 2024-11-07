@@ -1,0 +1,13 @@
+services:
+  api:
+    container_name: data-api
+    build:
+      dockerfile: Dockerfile
+      args:
+        - CI_COMMIT_SHA=....
+    env_file:
+      - .env
+      - .env.development
+      - .env.local
+    ports:
+      - "3000:8000"

@@ -1,0 +1,226 @@
+generator client {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+}
+
+datasource db {
+  provider     = "postgres"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+// ######################################################################
+
+enum Locale {
+  en_US
+  en_IN
+  hi_IN
+  vi_VN
+}
+
+model Account {
+  // Functional Fields
+  id String @id @default(cuid()) @db.VarChar(50)
+
+  // Info
+  imageUrl   String?    @db.Text
+  gender     String?    @db.VarChar(10)
+  birthday   DateTime?  @db.Timestamptz(3)
+  username   String?    @db.VarChar(100)
+  firstName  String?    @db.VarChar(100)
+  middleName String?    @db.VarChar(100)
+  lastName   String?    @db.VarChar(100)
+  nameOrder  NameOrder?
+  fullName   String?    @db.VarChar(200)
+  nickname   String?    @db.VarChar(100)
+
+  // Security
+  password String @db.Text
+
+  // Status
+  status AccountStatus?
+
+  // Technical Fields
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+  createdSource String    @db.VarChar(50)
+  createdBy     String    @db.VarChar(50)
+  updatedAt     DateTime? @updatedAt @db.Timestamptz(3)
+  updatedBy     String?   @db.VarChar(50)
+  deletedAt     DateTime? @db.Timestamptz(3)
+  deletedBy     String?   @db.VarChar(50)
+  isActive      Boolean?  @default(true)
+
+  // User activities
+  logInCount  Int       @default(0)
+  lastLogInAt DateTime? @db.Timestamptz(3)
+
+  // Foreign Key Relations
+  organizationMemberships OrganizationMembership[]
+  accountAliases          AccountAlias[]
+  orders                  Order[]
+
+  @@unique([username, isActive])
+}
+
+enum NameOrder {
+  firstLast
+  lastFirst
+}
+
+enum AccountStatus {
+  banned
+}
+
+model AccountAlias {
+  // Functional Fields
+  id                 String           @id @default(cuid()) @db.VarChar(25)
+  accountId          String           @db.VarChar(50)
+  type               AccountAliasType
+  rawValue           String           @db.VarChar(350)
+  contactValue       String           @db.VarChar(350)
+  valueType          String?          @db.VarChar(20)
+  contactGroup       String?          @db.VarChar(50) // for phone no, it is the country calling code
+  contactGroupName   String?          @db.VarChar(50) // for phone no, it is the country code
+  contactGroup1      String?          @db.VarChar(50) // for phone no, it is the carrier/area code
+  contactBody        String?          @db.VarChar(300) // for phone no, it is the main part
+  contactExt         String?          @db.VarChar(20) // for phone no, it is the ext code
+  formatted          String?          @db.VarChar(350)
+  verification       Json?
+  verificationStatus String?          @db.VarChar(20)
+
+  // Technical Fields
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  createdBy String    @db.VarChar(50)
+  updatedAt DateTime? @updatedAt @db.Timestamptz(3)
+  updatedBy String?   @db.VarChar(50)
+  deletedAt DateTime? @db.Timestamptz(3)
+  deletedBy String?   @db.VarChar(50)
+  isActive  Boolean?  @default(true)
+  notified  Int       @default(0) // notify unregistered user about the invitation to a group
+
+  // User activities
+  logInCount  Int       @default(0)
+  lastLogInAt DateTime? @db.Timestamptz(3)
+
+  // Foreign Key Relations
+  account Account? @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  // @@unique([type, contactValue, (CASE WHEN "deletedAt" IS NULL THEN true ELSE NULL END)])
+  @@unique([type, contactValue, isActive])
+  @@index([accountId])
+}
+
+enum AccountAliasType {
+  emailAddr
+  phoneNo
+  web3Wallet
+  Google
+  Facebook
+  AppleID
+}
+
+model Organization {
+  // Functional Fields
+  id String @id @db.VarChar(50)
+
+  // Clerk
+  name     String  @db.VarChar(100)
+  slug     String? @db.VarChar(100)
+  imageUrl String? @db.Text
+
+  membersCount Int?
+
+  // Technical Fields
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  createdBy String    @db.VarChar(50)
+  updatedAt DateTime? @updatedAt @db.Timestamptz(3)
+  updatedBy String?   @db.VarChar(50)
+  deletedAt DateTime? @db.Timestamptz(3)
+  deletedBy String?   @db.VarChar(50)
+
+  // Foreign Key Relations
+  memberships OrganizationMembership[]
+}
+
+model OrganizationMembership {
+  // Functional Fields
+  id String @id @default(cuid()) @db.VarChar(50)
+
+  // Clerk
+  orgId     String                 @db.VarChar(50)
+  accountId String                 @db.VarChar(50)
+  role      OrganizationMemberRole
+
+  // Technical Fields
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  createdBy String    @db.VarChar(50)
+  updatedAt DateTime? @updatedAt @db.Timestamptz(3)
+  updatedBy String?   @db.VarChar(50)
+  deletedAt DateTime? @db.Timestamptz(3)
+  deletedBy String?   @db.VarChar(50)
+  isActive  Boolean?  @default(true)
+
+  // Foreign Key Relations
+  organization Organization @relation(fields: [orgId], references: [id])
+  account      Account      @relation(fields: [accountId], references: [id])
+
+  @@unique([orgId, accountId, isActive])
+  @@unique([accountId, isActive])
+  @@index([orgId])
+  @@index([accountId])
+}
+
+enum OrganizationMemberRole {
+  super_admin
+  admin
+  manager
+  member
+}
+
+model MemberRoleAccessMatrix {
+  no Int @id @default(autoincrement())
+
+  endpoint String                 @db.VarChar(50)
+  role     OrganizationMemberRole
+
+  @@index([endpoint])
+}
+
+model TaskSendEmail {
+  id        Int     @id @default(autoincrement())
+  category  String
+  from_addr String
+  to        Json[]
+  cc        Json[]
+  bcc       Json[]
+  locale    Locale?
+  subject   String  @db.Text
+  text      String  @db.Text
+  html      String  @db.Text
+
+  // Technical Fields
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  createdBy String    @db.VarChar(50)
+  updatedAt DateTime? @updatedAt @db.Timestamptz(3)
+  updatedBy String?   @db.VarChar(50)
+  deletedAt DateTime? @db.Timestamptz(3)
+  deletedBy String?   @db.VarChar(50)
+
+  jobStartedAt DateTime? @db.Timestamptz(3)
+  sentAt       DateTime? @db.Timestamptz(3)
+  sentBy       String?   @db.VarChar(50)
+  sendResult   Json?
+  jobError     String?   @db.Text
+}
+
+model Order {
+  // Functional Fields
+  id String @id @default(cuid()) @db.VarChar(50)
+
+  accountId String @db.VarChar(50)
+
+  account Account @relation(fields: [accountId], references: [id])
+
+  @@index([accountId])
+}
